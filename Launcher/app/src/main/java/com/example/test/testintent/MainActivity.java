@@ -1,11 +1,7 @@
 package com.example.test.testintent;
 
-import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-
-
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -16,6 +12,7 @@ import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.Button;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -27,7 +24,27 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Button button = (Button) findViewById(R.id.launchIntent);
         WebView webView = (WebView) findViewById(R.id.webView);
+
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean installed = appInstalledOrNot("com.example.test.target");
+                if(installed) {
+                    //This intent will help you to launch if the package is already installed
+                    Intent LaunchIntent = getPackageManager()
+                            .getLaunchIntentForPackage("com.example.test.target");
+                    startActivity(LaunchIntent);
+
+                    Log.i(LOG_TAG, "App is already installed on your phone");
+                } else {
+                    Log.i(LOG_TAG, "App is not installed on your phone");
+                }
+            }
+        });
+
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
@@ -44,7 +61,11 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        String url = "https://secure.sky.com/sky-service/app-redirect/android/launch";
+        // Remote
+//        String url = "https://secure.sky.com/sky-service/app-redirect/android/launch";
+
+        // Local
+        String url = "file:///android_asset/testLaunch.html";
 
         webView.loadUrl(url);
     }
@@ -69,5 +90,18 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private boolean appInstalledOrNot(String uri) {
+        PackageManager pm = getPackageManager();
+        boolean app_installed;
+        try {
+            pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES);
+            app_installed = true;
+        }
+        catch (PackageManager.NameNotFoundException e) {
+            app_installed = false;
+        }
+        return app_installed;
     }
 }
