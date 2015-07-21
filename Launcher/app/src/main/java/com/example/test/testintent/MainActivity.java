@@ -12,6 +12,7 @@ import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 
 
@@ -24,15 +25,16 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button button = (Button) findViewById(R.id.launchIntent);
-        WebView webView = (WebView) findViewById(R.id.webView);
+        Button button = (Button) findViewById(R.id.launch_intent_button);
+        WebView webView = (WebView) findViewById(R.id.default_webview);
+        WebView webViewCustomClient = (WebView) findViewById(R.id.custom_client_webview);
 
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 boolean installed = appInstalledOrNot("com.example.test.target");
-                if(installed) {
+                if (installed) {
                     //This intent will help you to launch if the package is already installed
                     Intent LaunchIntent = getPackageManager()
                             .getLaunchIntentForPackage("com.example.test.target");
@@ -45,6 +47,23 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        configureWebView(webView);
+        configureWebView(webViewCustomClient);
+
+
+        webViewCustomClient.setWebViewClient(new WebViewClient() {
+                                                 @Override
+                                                 public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                                                     return super.shouldOverrideUrlLoading(view, url);
+                                                 }
+                                             }
+        );
+
+        webView.loadUrl("file:///android_asset/testLaunch.html");
+        webViewCustomClient.loadUrl("file:///android_asset/testLaunch.html");
+    }
+
+    private void configureWebView(WebView webView) {
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
@@ -54,20 +73,10 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-
                 Log.e("WebConsole", consoleMessage.message());
-
                 return super.onConsoleMessage(consoleMessage);
             }
         });
-
-        // Remote
-//        String url = "https://secure.sky.com/sky-service/app-redirect/android/launch";
-
-        // Local
-        String url = "file:///android_asset/testLaunch.html";
-
-        webView.loadUrl(url);
     }
 
     @Override
@@ -98,8 +107,7 @@ public class MainActivity extends ActionBarActivity {
         try {
             pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES);
             app_installed = true;
-        }
-        catch (PackageManager.NameNotFoundException e) {
+        } catch (PackageManager.NameNotFoundException e) {
             app_installed = false;
         }
         return app_installed;

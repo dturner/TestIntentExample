@@ -6,15 +6,27 @@
     android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/launchIntent"
+        android:id="@+id/launch_intent_button"
         android:text="Launch"
         android:layout_width="wrap_content"
         android:layout_height="100dp" />
 
     <WebView
-        android:layout_below="@+id/launchIntent"
+        android:layout_below="@+id/launch_intent_button"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/webView"/>
+        android:id="@+id/default_webview"/>
 
+    <TextView
+        android:layout_below="@+id/default_webview"
+        android:id="@+id/custom_client_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Use a custom web client:"/>
+
+    <WebView
+        android:layout_below="@+id/custom_client_label"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/custom_client_webview"/>
 </RelativeLayout>
