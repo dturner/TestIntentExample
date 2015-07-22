@@ -2,6 +2,7 @@ package com.example.test.testintent;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -15,10 +16,13 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 
+import java.net.URISyntaxException;
+
 
 public class MainActivity extends ActionBarActivity {
 
     private static final String LOG_TAG = MainActivity.class.getCanonicalName();
+    private static final String APP_SCHEME = "com.example.launchtest:";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,12 +55,36 @@ public class MainActivity extends ActionBarActivity {
         configureWebView(webViewCustomClient);
 
 
-        webViewCustomClient.setWebViewClient(new WebViewClient() {
-                                                 @Override
-                                                 public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                                                     return super.shouldOverrideUrlLoading(view, url);
-                                                 }
-                                             }
+
+
+        webViewCustomClient.setWebViewClient(
+            new WebViewClient() {
+
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
+
+                    Intent intent = null;
+
+                    //Handle custom URL scheme and Intent scheme
+                    if (url.startsWith(APP_SCHEME)) {
+                        Uri uri = Uri.parse(url);
+                        intent = new Intent(Intent.ACTION_VIEW, uri);
+                    } else if (url.startsWith("intent:")) {
+                        try {
+                            intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+                        } catch (URISyntaxException e) {
+                            Log.e(LOG_TAG, "Invalid URL syntax for intent");
+                        }
+                    }
+
+                    if (intent != null){
+                        startActivity(intent);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
         );
 
         webView.loadUrl("file:///android_asset/testLaunch.html");
